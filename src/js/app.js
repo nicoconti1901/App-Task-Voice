@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
+    const transcript = event.results[0][0].transcript.toUpperCase(); // Convertir a mayúsculas
     addTask(transcript);
     micButton.classList.remove("recording");
   };
@@ -43,17 +43,22 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   function addTask(task) {
+    const date = new Date().toLocaleString(); // Obtener la fecha y hora actual
     const li = document.createElement("li");
     li.className = "task-item";
     li.innerHTML = `
+           <div class="task-date">${date}</div> 
+      <div class="task-details">
         <input type="checkbox" class="task-checkbox" />
         <span class="task-text">${task}</span>
-        <button class="delete-button">
-          <img src="/assets/img/trash-regular-24.png"></img>
+        <button class="delete-button" title="Eliminar">
+          <img src="/assets/img/X.png" alt="Eliminar" />
         </button>
-      `;
-    taskList.appendChild(li);
-    saveTask(task);
+      </div>
+    `;
+    taskList.prepend(li);
+    saveTask({ task, date }); // Guardar la tarea con la fecha
+    addDeleteEventListener(li.querySelector(".delete-button")); // Añadir evento de eliminación al nuevo botón
   }
 
   function saveTask(task) {
@@ -64,17 +69,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function loadTasks() {
     let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-    tasks.forEach((task) => {
+    tasks.sort((a, b) => new Date(b.date) - new Date(a.date)); // Ordenar por fecha descendente
+    tasks.forEach((taskObj) => {
       const li = document.createElement("li");
       li.className = "task-item";
       li.innerHTML = `
-          <input type="checkbox" class="task-checkbox" />
-          <span class="task-text">${task}</span>
-          <button class="delete-button">
-            <img src="/assets/img/trash-regular-24.png"></img>
-          </button>
-        `;
+              <div class="task-date">${taskObj.date}</div> 
+      <div class="task-details">
+        <input type="checkbox" class="task-checkbox" />
+        <span class="task-text">${taskObj.task}</span>
+        <button class="delete-button" title="Eliminar">
+          <img src="/assets/img/X.png" alt="Eliminar" />
+        </button>
+      </div>
+      `;
       taskList.appendChild(li);
+      addDeleteEventListener(li.querySelector(".delete-button")); // Añadir evento de eliminación a los botones cargados
     });
   }
 
@@ -85,9 +95,9 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.style.display = "block";
   }
 
-  function removeTaskFromStorage(task) {
+  function removeTaskFromStorage(taskText) {
     let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-    tasks = tasks.filter((t) => t !== task);
+    tasks = tasks.filter((task) => task.task !== taskText);
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }
 
@@ -116,12 +126,12 @@ document.addEventListener("DOMContentLoaded", () => {
     successModal.style.display = "none";
   });
 
-  taskList.addEventListener("click", (event) => {
-    if (event.target.closest(".delete-button")) {
+  function addDeleteEventListener(button) {
+    button.addEventListener("click", (event) => {
       const taskItem = event.target.closest(".task-item");
       deleteTask(taskItem);
-    }
-  });
+    });
+  }
 
-  loadTasks();
+  loadTasks(); // Cargar tareas al iniciar
 });
