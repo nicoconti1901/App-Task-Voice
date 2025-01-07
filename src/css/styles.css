@@ -2,7 +2,8 @@
   font-family: Roboto Mono;
   margin-bottom: 15px;
 }
-body,html {
+body,
+html {
   background: linear-gradient(rgba(31, 31, 31, 0.8), rgba(20, 20, 20, 0.8)),
     url("/assets/img/fondo5.jpg"); /* Ruta de la imagen de fondo */
   background-size: cover; /* Asegura que la imagen cubra todo el fondo */
@@ -11,7 +12,6 @@ body,html {
   color: white; /* Color del texto */
   font-family: "Roboto Mono", monospace; /* Fuente de Google Fonts */
   min-height: 100vh; /* Asegura que el cuerpo ocupe al menos la altura de la ventana */
-  
 }
 
 .task-container {
@@ -30,6 +30,7 @@ body,html {
   color: white;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   overflow: hidden;
+  
 }
 
 .task-container:hover {
@@ -47,6 +48,14 @@ body,html {
   .task-container {
     width: 70%;
   }
+}
+
+#noTasksMessage {
+  margin-top: 20px ;
+  margin-bottom: 30px;  /* Añadir margen superior al mensaje */
+  font-size: 1.2em;
+  color: #888;
+  text-align: center;
 }
 
 .full-width-button {
@@ -121,6 +130,17 @@ body,html {
   line-height: 1.5;
 }
 
+.task-item:hover {
+  background: linear-gradient(90deg, rgb(110, 109, 109) 0%, rgba(240, 240, 240, 1) 100%);
+      .task-text {
+        color: rgb(24, 22, 22);
+      }
+      .task-date{
+        color: #000000;
+      }
+}
+
+
 .task-checkbox {
   margin-right: 10px;
   background-color: #000000; /* Cambia el color de fondo */
@@ -173,8 +193,6 @@ body,html {
   align-items: center;
   width: 100%;
 }
-
-
 
 .delete-button {
   position: relative; /* Necesario para posicionar el tooltip */
@@ -283,4 +301,3 @@ body,html {
 #success-close:hover {
   background-color: #1e88e5; /* Azul más oscuro al pasar el ratón */
 }
-

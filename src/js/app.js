@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const micButton = document.getElementById("micButton");
   const taskList = document.getElementById("taskList");
+  const noTasksMessage = document.getElementById("noTasksMessage");
   const modal = document.getElementById("modal");
   const modalMessage = document.getElementById("modal-message");
   const modalConfirm = document.getElementById("modal-confirm");
@@ -59,6 +60,9 @@ document.addEventListener("DOMContentLoaded", () => {
     taskList.prepend(li);
     saveTask({ task, date }); // Guardar la tarea con la fecha
     addDeleteEventListener(li.querySelector(".delete-button")); // Añadir evento de eliminación al nuevo botón
+    addToggleCheckboxEventListener(li); // Añadir evento de alternar checkbox al nuevo elemento
+    updateNoTasksMessage(); // Actualizar el mensaje de "No hay tareas agregadas"
+
   }
 
   function saveTask(task) {
@@ -85,7 +89,10 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
       taskList.appendChild(li);
       addDeleteEventListener(li.querySelector(".delete-button")); // Añadir evento de eliminación a los botones cargados
+      addToggleCheckboxEventListener(li); // Añadir evento de alternar checkbox al nuevo elemento
+
     });
+    updateNoTasksMessage(); // Actualizar el mensaje de "No hay tareas agregadas"
   }
 
   function deleteTask(taskElement) {
@@ -113,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
       removeTaskFromStorage(taskText);
       showSuccessModal("Tarea borrada con éxito");
       taskToDelete = null;
+      updateNoTasksMessage(); // Actualizar el mensaje de "No hay tareas agregadas"
     }
     modal.style.display = "none";
   });
@@ -131,6 +139,29 @@ document.addEventListener("DOMContentLoaded", () => {
       const taskItem = event.target.closest(".task-item");
       deleteTask(taskItem);
     });
+  }
+
+  function addToggleCheckboxEventListener(taskItem) {
+    const checkbox = taskItem.querySelector(".task-checkbox");
+
+    taskItem.addEventListener("click", (event) => {
+      if (!event.target.closest(".delete-button")) {
+        checkbox.checked = !checkbox.checked;
+      }
+    });
+
+    checkbox.addEventListener("click", (event) => {
+      event.stopPropagation(); // Evitar que el evento se propague al task-item
+    });
+  }
+
+  function updateNoTasksMessage() {
+    const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    if (tasks.length === 0) {
+      noTasksMessage.style.display = "block";
+    } else {
+      noTasksMessage.style.display = "none";
+    }
   }
 
   loadTasks(); // Cargar tareas al iniciar
