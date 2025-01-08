@@ -30,7 +30,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   recognition.onresult = (event) => {
     const transcript = event.results[0][0].transcript.toUpperCase(); // Convertir a mayúsculas
-    addTask(transcript);
+    const { text, prioridad } = extractTaskDetails(transcript);
+    const task = new Task(text, prioridad);
+    addTask(task);
     micButton.classList.remove("recording");
   };
 
@@ -43,26 +45,57 @@ document.addEventListener("DOMContentLoaded", () => {
     micButton.classList.remove("recording");
   };
 
-  function addTask(task) {
-    const date = new Date().toLocaleString(); // Obtener la fecha y hora actual
-    const li = document.createElement("li");
-    li.className = "task-item";
-    li.innerHTML = `
-           <div class="task-date">${date}</div> 
-      <div class="task-details">
-        <input type="checkbox" class="task-checkbox" />
-        <span class="task-text">${task}</span>
-        <button class="delete-button" title="Eliminar">
-          <img src="/assets/img/X.png" alt="Eliminar" />
-        </button>
-      </div>
-    `;
-    taskList.prepend(li);
-    saveTask({ task, date }); // Guardar la tarea con la fecha
-    addDeleteEventListener(li.querySelector(".delete-button")); // Añadir evento de eliminación al nuevo botón
-    addToggleCheckboxEventListener(li); // Añadir evento de alternar checkbox al nuevo elemento
-    updateNoTasksMessage(); // Actualizar el mensaje de "No hay tareas agregadas"
+  class Task {
+    constructor(text, prioridad = "Media") {
+      this.text = text;
+      this.date = new Date().toLocaleString();
+      this.prioridad = this.validatePrioridad(prioridad);
+    }
 
+    validatePrioridad(prioridad) {
+      const prioridades = ["URGENTE", "MEDIA", "BAJA"];
+      return prioridades.includes(prioridad) ? prioridad : "MEDIA";
+    }
+
+    render() {
+      const li = document.createElement("li");
+      li.className = `task-item ${this.prioridad.toLowerCase()}`;
+      li.innerHTML = `
+        <div class="task-date">${this.date}</div>
+        <div class="task-details">
+          <input type="checkbox" class="task-checkbox" />
+          <span class="task-text">${this.text}</span>
+          <button class="delete-button" title="Eliminar">
+            <img src="/assets/img/X.png" alt="Eliminar" />
+          </button>
+        </div>
+      `;
+      return li;
+    }
+  }
+
+  function extractTaskDetails(transcript) {
+    const prioridades = ["URGENTE", "MEDIA", "BAJA"];
+    let prioridad = "MEDIA"; // Valor por defecto
+    let text = transcript;
+
+    prioridades.forEach((p) => {
+      if (transcript.includes(p)) {
+        prioridad = p;
+        text = text.replace(p, "").trim(); // Eliminar la prioridad del texto
+      }
+    });
+    text = text.replace("PRIORIDAD", "").trim();
+    return { text, prioridad };
+  }
+
+  function addTask(task) {
+    const li = task.render();
+    taskList.prepend(li);
+    saveTask(task);
+    addDeleteEventListener(li.querySelector(".delete-button"));
+    addToggleCheckboxEventListener(li);
+    updateNoTasksMessage();
   }
 
   function saveTask(task) {
@@ -73,26 +106,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function loadTasks() {
     let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-    tasks.sort((a, b) => new Date(b.date) - new Date(a.date)); // Ordenar por fecha descendente
+    tasks.sort((a, b) => new Date(b.date) - new Date(a.date));
     tasks.forEach((taskObj) => {
-      const li = document.createElement("li");
-      li.className = "task-item";
-      li.innerHTML = `
-              <div class="task-date">${taskObj.date}</div> 
-      <div class="task-details">
-        <input type="checkbox" class="task-checkbox" />
-        <span class="task-text">${taskObj.task}</span>
-        <button class="delete-button" title="Eliminar">
-          <img src="/assets/img/X.png" alt="Eliminar" />
-        </button>
-      </div>
-      `;
+      const task = new Task(taskObj.text, taskObj.prioridad);
+      task.date = taskObj.date;
+      const li = task.render();
       taskList.appendChild(li);
-      addDeleteEventListener(li.querySelector(".delete-button")); // Añadir evento de eliminación a los botones cargados
-      addToggleCheckboxEventListener(li); // Añadir evento de alternar checkbox al nuevo elemento
-
+      addDeleteEventListener(li.querySelector(".delete-button"));
+      addToggleCheckboxEventListener(li);
     });
-    updateNoTasksMessage(); // Actualizar el mensaje de "No hay tareas agregadas"
+    updateNoTasksMessage();
   }
 
   function deleteTask(taskElement) {
@@ -104,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function removeTaskFromStorage(taskText) {
     let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-    tasks = tasks.filter((task) => task.task !== taskText);
+    tasks = tasks.filter((task) => task.text !== taskText);
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }
 
@@ -120,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
       removeTaskFromStorage(taskText);
       showSuccessModal("Tarea borrada con éxito");
       taskToDelete = null;
-      updateNoTasksMessage(); // Actualizar el mensaje de "No hay tareas agregadas"
+      updateNoTasksMessage();
     }
     modal.style.display = "none";
   });
@@ -151,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     checkbox.addEventListener("click", (event) => {
-      event.stopPropagation(); // Evitar que el evento se propague al task-item
+      event.stopPropagation();
     });
   }
 
@@ -164,5 +187,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  loadTasks(); // Cargar tareas al iniciar
+  loadTasks();
 });
