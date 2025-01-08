@@ -40,9 +40,35 @@ html {
 
 .task-container h1 {
   padding: 7px;
-  font-size: 2em;
-  color: #ea6518; /* Color cian metálico */
+  font-size: 1.9em; /* Aumentar el tamaño de la fuente */
+  color: #ff6f61; /* Color vibrante */
   text-align: center;
+  font-family: 'Open Sans', sans-serif; /* Aplicar la fuente Open Sans */
+  background: linear-gradient(135deg, #ff6f61, #ffcc00); /* Degradado de color más vibrante */
+  -webkit-background-clip: text; /* Clip de fondo para texto en WebKit */
+  -webkit-text-fill-color: transparent; /* Relleno de texto transparente en WebKit */
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7); /* Sombra de texto más pronunciada */
+  transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease; /* Transición suave para cambios de color, sombra y transformación */
+  text-transform: uppercase; /* Todo en mayúsculas */
+  animation: fadeIn 1s ease-in-out; /* Animación de entrada */
+}
+
+.task-container h1:hover {
+  color: #ffcc00; /* Cambiar color al pasar el ratón */
+  text-shadow: 3px 3px 12px rgba(0, 0, 0, 0.9); /* Aumentar sombra al pasar el ratón */
+  transform: scale(1.1); /* Aumentar ligeramente el tamaño al pasar el ratón */
+  border-color: #ffcc00; /* Cambiar el color del borde al pasar el ratón */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .task-container h2{
@@ -56,6 +82,8 @@ html {
   align-items: center; /* Alinear verticalmente los elementos */
   width: 100%;
   justify-content: center;
+  
+
 }
 
 .priority-symbol {
